@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Replacement Tool</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            display: flex;
+            align-items: flex-start;
+        }
+        .input-container {
+            width: 30%;
+            padding-right: 20px;
+            border-right: 2px solid #ccc;
+        }
+        .output-container {
+            padding-left: 20px;
+        }
+        .input-field {
+            margin-bottom: 10px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        textarea {
+            width: 450px; /* Set a fixed suitable width */
+            height: 200px;
+            font-family: monospace;
+            margin-bottom: 10px;
+            resize: none; /* Disable resizing of the textarea */
+            overflow: hidden; /* Prevent scrollbars if content overflows, might adjust as needed */
+        }
+        button {
+            margin-right: 10px;
+            padding: 5px 15px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+        .btn-yes {
+            border: 1px solid #ccc;
+            background-color: white;
+            color: black;
+        }
+        .btn-no {
+            border: 1px solid #ccc;
+            background-color: white;
+            color: black;
+        }
+        .selected-yes {
+            background-color: green;
+            color: white;
+        }
+        .selected-no {
+            background-color: red;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Text Replacement Tool</h1>
+
+    <div class="container">
+        <div class="input-container">
+            <h2>Requirement</h2>
+            <div class="input-field">
+                <label for="replaceInput">Replacement:</label>
+                <input type="text" id="replaceInput" placeholder="Enter text">
+            </div>
+            <div class="input-field">
+                <label>Nullable?</label>
+                <button id="nullableYes" class="btn-yes" onclick="selectOption('nullable', 'yes')">Yes</button>
+                <button id="nullableNo" class="btn-no selected-no" onclick="selectOption('nullable', 'no')">No</button>
+            </div>
+            <div class="input-field">
+                <label>Separator?</label>
+                <button id="separatorYes" class="btn-yes" onclick="selectOption('separator', 'yes')">Yes</button>
+                <button id="separatorNo" class="btn-no selected-no" onclick="selectOption('separator', 'no')">No</button>
+            </div>
+            <button onclick="resetToDefault()">Reset</button>
+            <button onclick="copyToClipboard()">Copy</button>
+        </div>
+        <div class="output-container">
+            <h2>Output:</h2>
+            <textarea id="outputText" readonly></textarea>
+        </div>
+    </div>
+
+    <script>
+        const defaultTemplate = `
+    PLACEHOLDERs    : LB PLACEHOLDERList RB;
+    PLACEHOLDERList : PLACEHOLDERLeast | ;
+    PLACEHOLDERLeast: /*SEPARATOR*/PLACEHOLDEREleme PLACEHOLDERLeast | PLACEHOLDEREleme;
+    PLACEHOLDEREleme: 'To be fill';`;
+    
+        function updateText() {
+            const replaceValue = document.getElementById("replaceInput").value.trim() || 'arg';
+            const separatorYesSelected = document.getElementById("separatorYes").classList.contains("selected-yes");
+            
+            let updatedText = defaultTemplate.split('PLACEHOLDER').join(replaceValue);
+            
+            // Replace the /*SEPARATOR*/ placeholder based on selection
+            if (separatorYesSelected) {
+                updatedText = updatedText.replace('/*SEPARATOR*/', 'SM ');
+            } else {
+                updatedText = updatedText.replace('/*SEPARATOR*/', '');
+            }
+            
+            document.getElementById("outputText").value = updatedText;
+        }
+    
+        function resetToDefault() {
+            document.getElementById("replaceInput").value = '';
+            document.getElementById("nullableYes").classList.remove("selected-yes");
+            document.getElementById("nullableNo").classList.add("selected-no");
+            document.getElementById("separatorYes").classList.remove("selected-yes");
+            document.getElementById("separatorNo").classList.add("selected-no");
+    
+            updateText(); // Ensure output is reset by using updateText with default values
+        }
+    
+        function copyToClipboard() {
+            const outputText = document.getElementById("outputText");
+            outputText.select();
+            outputText.setSelectionRange(0, 99999); // For mobile devices
+            document.execCommand("copy");
+        }
+    
+        function selectOption(option, value) {
+            const yesButton = document.getElementById(option + "Yes");
+            const noButton = document.getElementById(option + "No");
+            if (value === 'yes') {
+                yesButton.classList.add("selected-yes");
+                noButton.classList.remove("selected-no");
+            } else {
+                yesButton.classList.remove("selected-yes");
+                noButton.classList.add("selected-no");
+            }
+    
+            updateText(); // Update the text each time an option is selected
+        }
+    
+        document.getElementById("replaceInput").addEventListener("input", updateText);
+    
+        // Initialize with default state
+        resetToDefault();
+    </script>
+</body>
+</html>

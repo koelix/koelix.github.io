@@ -95,7 +95,7 @@
         const defaultTemplate = `
 PLACEHOLDERs    : LB PLACEHOLDERList RB;
 PLACEHOLDERList : PLACEHOLDERLeast | ;
-PLACEHOLDERLeast: /*SEPARATOR*/PLACEHOLDEREleme PLACEHOLDERLeast | PLACEHOLDEREleme;
+PLACEHOLDERLeast: /*SEPARATOR*/PLACEHOLDERLeast PLACEHOLDEREleme | PLACEHOLDEREleme;
 PLACEHOLDEREleme: 'To be fill';`;
     
         function updateText() {

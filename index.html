@@ -93,10 +93,10 @@
 
     <script>
         const defaultTemplate = `
-    PLACEHOLDERs    : LB PLACEHOLDERList RB;
-    PLACEHOLDERList : PLACEHOLDERLeast | ;
-    PLACEHOLDERLeast: /*SEPARATOR*/PLACEHOLDEREleme PLACEHOLDERLeast | PLACEHOLDEREleme;
-    PLACEHOLDEREleme: 'To be fill';`;
+PLACEHOLDERs    : LB PLACEHOLDERList RB;
+PLACEHOLDERList : PLACEHOLDERLeast | ;
+PLACEHOLDERLeast: /*SEPARATOR*/PLACEHOLDEREleme PLACEHOLDERLeast | PLACEHOLDEREleme;
+PLACEHOLDEREleme: 'To be fill';`;
     
         function updateText() {
             const replaceValue = document.getElementById("replaceInput").value.trim() || 'arg';

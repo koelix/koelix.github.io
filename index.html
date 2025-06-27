@@ -1,154 +1,538 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Text Replacement Tool</title>
+    <title>The AI Hyper-Personalization Playbook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Chosen Palette: Corporate Indigo & Amber -->
+    <!-- Application Structure Plan: A responsive, single-page application with a vertical-scrolling narrative flow and a sticky top navigation. The structure is designed to guide the user from the "Why" (The strategic imperative and ROI) to the "How" (The AI framework) and finally to the interactive "What" (Tools for segmentation, content prompt generation, and lead scoring model comparison). This task-oriented design transforms the report's dense information into an actionable, explorable playbook, making complex concepts tangible and easier to understand than a static document. -->
+    <!-- Visualization & Content Choices: Key stats are presented as animated "Key Figure" callouts to grab attention. Chart.js is used for a bar chart (Perception Gap) and a donut chart (CTA Conversion) to visualize comparative data simply. The core of the application's interactivity relies on vanilla JavaScript to power a "Micro-Segment Builder" (using dropdowns to dynamically update text), a "Prompt Generator" (dynamically creating prompt examples), and an expanding card interface for comparing lead scoring models. This approach prioritizes direct user engagement and learning-by-doing over passive reading. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
     <style>
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc; /* slate-50 */
+            color: #1e293b; /* slate-800 */
         }
-        .container {
-            display: flex;
-            align-items: flex-start;
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
         }
-        .input-container {
-            width: 30%;
-            padding-right: 20px;
-            border-right: 2px solid #ccc;
+        .nav-link.active {
+            color: #4f46e5; /* indigo-600 */
+            border-bottom-color: #4f46e5; /* indigo-600 */
         }
-        .output-container {
-            padding-left: 20px;
-        }
-        .input-field {
-            margin-bottom: 10px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-        }
-        textarea {
-            width: 450px; /* Set a fixed suitable width */
-            height: 200px;
-            font-family: monospace;
-            margin-bottom: 10px;
-            resize: none; /* Disable resizing of the textarea */
-            overflow: hidden; /* Prevent scrollbars if content overflows, might adjust as needed */
-        }
-        button {
-            margin-right: 10px;
-            padding: 5px 15px;
-            cursor: pointer;
-            border: 1px solid transparent;
-        }
-        .btn-yes {
-            border: 1px solid #ccc;
+        .stat-card {
             background-color: white;
-            color: black;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
         }
-        .btn-no {
-            border: 1px solid #ccc;
-            background-color: white;
-            color: black;
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
         }
-        .selected-yes {
-            background-color: green;
-            color: white;
+        .prompt-block {
+            background-color: #1e293b; /* slate-800 */
+            color: #e2e8f0; /* slate-200 */
+            border-radius: 0.5rem;
+            padding: 1rem;
+            font-family: 'Courier New', Courier, monospace;
         }
-        .selected-no {
-            background-color: red;
-            color: white;
+        .chart-container {
+            position: relative;
+            margin: auto;
+            height: 320px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .section-title {
+            font-size: 2.25rem;
+            line-height: 2.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+        .section-intro {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+            text-align: center;
+            max-width: 48rem;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 3rem;
+            color: #475569; /* slate-600 */
         }
     </style>
 </head>
-<body>
-    <h1>Text Replacement Tool</h1>
+<body class="antialiased">
 
-    <div class="container">
-        <div class="input-container">
-            <h2>Requirement</h2>
-            <div class="input-field">
-                <label for="replaceInput">Replacement:</label>
-                <input type="text" id="replaceInput" placeholder="Enter text">
+    <header class="bg-white/80 backdrop-blur-sm sticky top-0 z-50 shadow-md">
+        <nav class="container mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <div class="text-xl font-bold text-indigo-600">AI Personalization Playbook</div>
+                <div class="hidden md:flex space-x-8">
+                    <a href="#imperative" class="nav-link font-medium">The Imperative</a>
+                    <a href="#roi" class="nav-link font-medium">The ROI</a>
+                    <a href="#framework" class="nav-link font-medium">The Framework</a>
+                    <a href="#scoring" class="nav-link font-medium">Lead Scoring</a>
+                </div>
             </div>
-            <div class="input-field">
-                <label>Nullable?</label>
-                <button id="nullableYes" class="btn-yes" onclick="selectOption('nullable', 'yes')">Yes</button>
-                <button id="nullableNo" class="btn-no selected-no" onclick="selectOption('nullable', 'no')">No</button>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="py-20 bg-white">
+            <div class="container mx-auto px-4 text-center">
+                <h1 class="text-4xl md:text-5xl font-bold text-slate-900 mb-4">From Generic to Genuine: The Hyper-Personalization Revolution</h1>
+                <p class="text-lg md:text-xl text-slate-600 max-w-3xl mx-auto">This is an interactive guide to leveraging Artificial Intelligence for hyper-personalized B2B customer journeys. Move beyond theory and discover the actionable framework to transform your marketing and sales into a data-driven growth engine.</p>
             </div>
-            <div class="input-field">
-                <label>Separator?</label>
-                <button id="separatorYes" class="btn-yes" onclick="selectOption('separator', 'yes')">Yes</button>
-                <button id="separatorNo" class="btn-no selected-no" onclick="selectOption('separator', 'no')">No</button>
+        </section>
+
+        <section id="imperative" class="py-16">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">The Personalization Imperative</h2>
+                <p class="section-intro">In today's market, personalization is not a feature—it's a fundamental expectation. The data reveals a critical gap between how well companies think they are personalizing experiences and what customers actually perceive.</p>
+                
+                <div class="grid md:grid-cols-2 gap-8 items-center">
+                    <div>
+                        <h3 class="text-2xl font-semibold mb-4 text-slate-800">The Customer Expectation Gap</h3>
+                        <p class="text-slate-600 mb-6">While a vast majority of businesses believe they offer personalized experiences, a significant portion of customers disagree. This disconnect leads to frustration, lost opportunities, and revenue leakage. Closing this gap is the first step towards growth.</p>
+                        <div class="space-y-4">
+                            <div class="stat-card !shadow-none border border-slate-200">
+                                <span class="text-4xl font-bold text-indigo-600">71%</span>
+                                <p class="text-slate-600 mt-1">of consumers expect personalized interactions.</p>
+                            </div>
+                             <div class="stat-card !shadow-none border border-slate-200">
+                                <span class="text-4xl font-bold text-amber-500">76%</span>
+                                <p class="text-slate-600 mt-1">feel frustrated when they don't get them.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="chart-container">
+                            <canvas id="perceptionGapChart"></canvas>
+                        </div>
+                        <p class="text-center text-sm text-slate-500 mt-2">Figure 1: Business Perception vs. Customer Reality on Personalization</p>
+                    </div>
+                </div>
             </div>
-            <button onclick="resetToDefault()">Reset</button>
-            <button onclick="copyToClipboard()">Copy</button>
+        </section>
+        
+        <section id="roi" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">A Strategic Growth Engine</h2>
+                <p class="section-intro">Investing in hyper-personalization isn't just about meeting expectations—it's a direct driver of significant financial returns across the entire customer lifecycle. Explore the measurable impact on revenue, conversions, and costs.</p>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div class="stat-card text-center">
+                        <div class="text-5xl font-bold text-indigo-600 mb-2">+40%</div>
+                        <h3 class="text-lg font-semibold text-slate-800">More Revenue</h3>
+                        <p class="text-slate-500">Generated by companies that lead in personalization.</p>
+                    </div>
+                    <div class="stat-card text-center">
+                        <div class="text-5xl font-bold text-indigo-600 mb-2">-50%</div>
+                        <h3 class="text-lg font-semibold text-slate-800">Lower Acquisition Cost</h3>
+                        <p class="text-slate-500">By targeting the right customers with the right message.</p>
+                    </div>
+                    <div class="stat-card text-center">
+                         <div class="text-5xl font-bold text-indigo-600 mb-2">+67%</div>
+                        <h3 class="text-lg font-semibold text-slate-800">Higher Customer Spend</h3>
+                        <p class="text-slate-500">Retained customers spend significantly more over time.</p>
+                    </div>
+                    <div class="stat-card text-center md:col-span-2 lg:col-span-1">
+                        <div class="text-5xl font-bold text-indigo-600 mb-2">6x</div>
+                        <h3 class="text-lg font-semibold text-slate-800">Higher Transaction Rates</h3>
+                        <p class="text-slate-500">From personalized email campaigns.</p>
+                    </div>
+                    <div class="stat-card md:col-span-2 lg:col-span-2 flex flex-col md:flex-row items-center gap-6">
+                        <div class="chart-container !h-48 !w-48 flex-shrink-0">
+                             <canvas id="ctaConversionChart"></canvas>
+                        </div>
+                        <div class="text-center md:text-left">
+                            <h3 class="text-lg font-semibold text-slate-800">Personalized CTAs Convert 202% Better</h3>
+                            <p class="text-slate-500">Tailoring the call-to-action to the user segment dramatically increases conversion rates compared to generic CTAs.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="framework" class="py-16">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">The AI-Powered Framework</h2>
+                <p class="section-intro">AI is the catalyst that makes hyper-personalization possible at scale. This framework breaks the process down into actionable tasks, from understanding your audience to delivering the perfect message. Use the interactive tools below to see it in action.</p>
+
+                <div class="bg-white p-8 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-bold text-center mb-6">Task 1: The Micro-Segment Builder</h3>
+                    <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">True personalization starts with deep segmentation. Combine the four dimensions below to create a highly specific micro-segment, which forms the blueprint for every tailored interaction.</p>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                        <div>
+                            <label for="dimension1" class="font-semibold text-slate-700 block mb-2">1. Firmographics</label>
+                            <select id="dimension1" class="w-full p-2 border border-slate-300 rounded-md">
+                                <option value="Finance, Enterprise, Tier 1">Finance, Enterprise</option>
+                                <option value="Retail, SME, Tier 3">Retail, SME</option>
+                                <option value="Healthcare, Mid-Market, Tier 2">Healthcare, Mid-Market</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="dimension2" class="font-semibold text-slate-700 block mb-2">2. Buyer Persona</label>
+                            <select id="dimension2" class="w-full p-2 border border-slate-300 rounded-md">
+                                <option value="Technical Buyer (IT Director)">Technical Buyer</option>
+                                <option value="Economic Buyer (Owner)">Economic Buyer</option>
+                                <option value="User Buyer (Clinic Manager)">User Buyer</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="dimension3" class="font-semibold text-slate-700 block mb-2">3. Relationship Status</label>
+                            <select id="dimension3" class="w-full p-2 border border-slate-300 rounded-md">
+                                <option value="Active Lead">Active Lead</option>
+                                <option value="New Prospect">New Prospect</option>
+                                <option value="Current Client">Current Client</option>
+                            </select>
+                        </div>
+                        <div>
+                           <label for="dimension4" class="font-semibold text-slate-700 block mb-2">4. Journey Stage</label>
+                            <select id="dimension4" class="w-full p-2 border border-slate-300 rounded-md">
+                                <option value="Consideration">Consideration</option>
+                                <option value="Awareness">Awareness</option>
+                                <option value="Retention">Retention</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div id="segment-output" class="bg-indigo-50 p-6 rounded-lg border border-indigo-200">
+                        <h4 class="font-bold text-indigo-900">Generated Micro-Segment Profile:</h4>
+                        <p id="segment-description" class="text-indigo-800 mt-2"></p>
+                    </div>
+                </div>
+
+                <div class="bg-white p-8 rounded-lg shadow-lg mt-12">
+                     <h3 class="text-2xl font-bold text-center mb-6">Task 2: The AI Prompt Generator</h3>
+                    <p class="text-center text-slate-600 mb-8 max-w-2xl mx-auto">Activate your micro-segments with tailored content. Select a segment and content type to generate a structured AI prompt and see an example of the personalized output it can create.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                        <div>
+                           <label for="prompt-segment" class="font-semibold text-slate-700 block mb-2">Target Micro-Segment</label>
+                           <select id="prompt-segment" class="w-full p-2 border border-slate-300 rounded-md">
+                               <option value="tech">FIN-ENT-TECH-LEAD-CONSIDER</option>
+                               <option value="eco">RET-SME-ECO-AWARE</option>
+                               <option value="user">HC-MID-USER-CURRENT-RETENT</option>
+                           </select>
+                        </div>
+                        <div>
+                           <label for="prompt-content" class="font-semibold text-slate-700 block mb-2">Content Type</label>
+                           <select id="prompt-content" class="w-full p-2 border border-slate-300 rounded-md">
+                               <option value="headline">Landing Page Headline</option>
+                               <option value="subject">Email Subject Line</option>
+                               <option value="body">Email Body</option>
+                           </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-slate-800 mb-2">AI Prompt (Role, Context, Task, Format)</h4>
+                            <div id="prompt-text" class="prompt-block text-sm"></div>
+                            <button id="copy-button" class="mt-2 bg-indigo-600 text-white py-1 px-3 rounded-md text-sm hover:bg-indigo-700">Copy Prompt</button>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-slate-800 mb-2">Example AI Output</h4>
+                            <div id="prompt-output" class="bg-slate-100 p-4 rounded-md border border-slate-200 text-slate-700 italic"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="scoring" class="py-16 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="section-title">Task 3: Intelligent Lead Scoring</h2>
+                <p class="section-intro">Not all leads are created equal. AI-powered lead scoring helps your sales team prioritize their efforts on prospects most likely to convert. Compare the three main models to find the right fit for your organization.</p>
+                <div id="scoring-models-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-slate-800 text-slate-300 py-8">
+        <div class="container mx-auto px-4 text-center">
+            <p>&copy; 2024 AI Hyper-Personalization Playbook. A conceptual application.</p>
         </div>
-        <div class="output-container">
-            <h2>Output:</h2>
-            <textarea id="outputText" readonly></textarea>
-        </div>
-    </div>
+    </footer>
 
     <script>
-        const defaultTemplate = `
-PLACEHOLDERs    : LB PLACEHOLDERList RB;
-PLACEHOLDERList : PLACEHOLDERLeast | ;
-PLACEHOLDERLeast: PLACEHOLDEREleme /*SEPARATOR*/PLACEHOLDERLeast | PLACEHOLDEREleme;
-PLACEHOLDEREleme: 'To be fill';`;
-    
-        function updateText() {
-            const replaceValue = document.getElementById("replaceInput").value.trim() || 'arg';
-            const separatorYesSelected = document.getElementById("separatorYes").classList.contains("selected-yes");
-            
-            let updatedText = defaultTemplate.split('PLACEHOLDER').join(replaceValue);
-            
-            // Replace the /*SEPARATOR*/ placeholder based on selection
-            if (separatorYesSelected) {
-                updatedText = updatedText.replace('/*SEPARATOR*/', 'SM ');
-            } else {
-                updatedText = updatedText.replace('/*SEPARATOR*/', '');
-            }
-            
-            document.getElementById("outputText").value = updatedText;
-        }
-    
-        function resetToDefault() {
-            document.getElementById("replaceInput").value = '';
-            document.getElementById("nullableYes").classList.remove("selected-yes");
-            document.getElementById("nullableNo").classList.add("selected-no");
-            document.getElementById("separatorYes").classList.remove("selected-yes");
-            document.getElementById("separatorNo").classList.add("selected-no");
-    
-            updateText(); // Ensure output is reset by using updateText with default values
-        }
-    
-        function copyToClipboard() {
-            const outputText = document.getElementById("outputText");
-            outputText.select();
-            outputText.setSelectionRange(0, 99999); // For mobile devices
-            document.execCommand("copy");
-        }
-    
-        function selectOption(option, value) {
-            const yesButton = document.getElementById(option + "Yes");
-            const noButton = document.getElementById(option + "No");
-            if (value === 'yes') {
-                yesButton.classList.add("selected-yes");
-                noButton.classList.remove("selected-no");
-            } else {
-                yesButton.classList.remove("selected-yes");
-                noButton.classList.add("selected-no");
-            }
-    
-            updateText(); // Update the text each time an option is selected
-        }
-    
-        document.getElementById("replaceInput").addEventListener("input", updateText);
-    
-        // Initialize with default state
-        resetToDefault();
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const perceptionData = {
+                labels: ['Businesses Who Believe They Personalize', 'Customers Who Agree'],
+                datasets: [{
+                    label: 'Perception (%)',
+                    data: [85, 60],
+                    backgroundColor: [
+                        'rgba(79, 70, 229, 0.6)', // indigo-600
+                        'rgba(245, 158, 11, 0.6)'  // amber-500
+                    ],
+                    borderColor: [
+                        'rgba(79, 70, 229, 1)',
+                        'rgba(245, 158, 11, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            };
+
+            const perceptionGapCtx = document.getElementById('perceptionGapChart').getContext('2d');
+            new Chart(perceptionGapCtx, {
+                type: 'bar',
+                data: perceptionData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#475569' }
+                        },
+                        x: {
+                            ticks: { color: '#475569' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            const ctaData = {
+                labels: ['Personalized CTA Conversion Lift', 'Generic CTA Baseline'],
+                datasets: [{
+                    data: [202, 100],
+                     backgroundColor: [
+                        'rgba(79, 70, 229, 0.8)',
+                        'rgba(203, 213, 225, 0.8)' // slate-300
+                    ],
+                    borderColor: [
+                        '#ffffff'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            };
+
+            const ctaConversionCtx = document.getElementById('ctaConversionChart').getContext('2d');
+            new Chart(ctaConversionCtx, {
+                type: 'doughnut',
+                data: ctaData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false,
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const segmentBuilder = {
+                dim1: document.getElementById('dimension1'),
+                dim2: document.getElementById('dimension2'),
+                dim3: document.getElementById('dimension3'),
+                dim4: document.getElementById('dimension4'),
+                output: document.getElementById('segment-description'),
+                painPoints: {
+                    "Finance, Enterprise, Tier 1,Technical Buyer (IT Director),Active Lead,Consideration": "How will this solution integrate with our legacy systems and comply with our security standards?",
+                    "Retail, SME, Tier 3,Economic Buyer (Owner),New Prospect,Awareness": "How can I increase e-commerce ROI with a limited IT budget?",
+                    "Healthcare, Mid-Market, Tier 2,User Buyer (Clinic Manager),Current Client,Retention": "How can I fully leverage the new reporting features to improve operational efficiency?"
+                },
+                update: function() {
+                    const d1 = this.dim1.value;
+                    const d2 = this.dim2.value;
+                    const d3 = this.dim3.value;
+                    const d4 = this.dim4.value;
+                    const key = `${d1},${d2},${d3},${d4}`;
+                    const painPoint = this.painPoints[key] || "This combination highlights a unique customer profile. Consider their primary challenges.";
+                    
+                    this.output.innerHTML = `You've selected a <strong>${d2}</strong> at a <strong>${d1.replace(/, /g, " ")}</strong> company. They are a <strong>${d3}</strong> in the <strong>${d4}</strong> stage of the customer journey. <br><br>Their likely key question is: <em>"${painPoint}"</em>`;
+                }
+            };
+            [segmentBuilder.dim1, segmentBuilder.dim2, segmentBuilder.dim3, segmentBuilder.dim4].forEach(el => el.addEventListener('change', () => segmentBuilder.update()));
+            segmentBuilder.update();
+
+            const promptGenerator = {
+                segment: document.getElementById('prompt-segment'),
+                content: document.getElementById('prompt-content'),
+                promptText: document.getElementById('prompt-text'),
+                promptOutput: document.getElementById('prompt-output'),
+                copyButton: document.getElementById('copy-button'),
+                prompts: {
+                    tech: {
+                        headline: {
+                            prompt: '<strong>Role:</strong> Senior Solutions Architect.<br><strong>Task:</strong> Write 3 landing page headline variations for an IT Director at a large enterprise finance company.<br><strong>Context:</strong> Focus on addressing their main concerns about security and system integration.<br><strong>Format:</strong> Use a professional, trustworthy tone with a focus on technical assurance.',
+                            output: '1. "Fortified IT Solutions: SOC 2 Compliant & Seamless API Integration for the Finance Sector."<br>2. "Scalable Architecture Meets Enterprise-Grade Security: Your Trusted IT Partner."'
+                        },
+                        subject: {
+                            prompt: '<strong>Role:</strong> Engagement Manager.<br><strong>Task:</strong> Write 3 subject lines for a follow-up email.<br><strong>Context:</strong> The recipient is an IT Director concerned with security after a recent demo.<br><strong>Format:</strong> Clear, professional, and action-oriented.',
+                            output: '1. "Re: Your security questions"<br>2. "Following up on our demo: Integration & Security Docs"<br>3. "Your custom security checklist"'
+                        },
+                        body: {
+                            prompt: '<strong>Role:</strong> Solutions Consultant.<br><strong>Task:</strong> Draft a short email following up on a demo.<br><strong>Context:</strong> Address concerns about integration with legacy systems.<br><strong>Format:</strong> Helpful and direct, with a clear next step.',
+                            output: 'Hi [Name], Following up on our conversation, I’ve attached the technical whitepaper detailing our API and legacy system integration protocols. It directly addresses the security questions you raised. Are you free for a 15-minute call next week to discuss?'
+                        }
+                    },
+                    eco: {
+                         headline: {
+                            prompt: '<strong>Role:</strong> Growth Advisor.<br><strong>Task:</strong> Write 3 headlines for a retail SME owner.<br><strong>Context:</strong> They need to boost e-commerce ROI with a limited budget.<br><strong>Format:</strong> Benefit-driven and concise.',
+                            output: '1. "Boost Your E-commerce ROI with a Smarter IT Solution."<br>2. "The Affordable IT Platform That Pays for Itself."'
+                        },
+                        subject: {
+                            prompt: '<strong>Role:</strong> Business Growth Strategist.<br><strong>Task:</strong> Write 5 email subject line variations for the CEO of a mid-sized retail company.<br><strong>Context:</strong> Highlight the ROI of our e-commerce platform. The recipient is in the awareness stage.<br><strong>Format:</strong> Concise and benefit-driven.',
+                            output: '1. "Re: Your e-commerce growth strategy"<br>2. "A 30% revenue lift for retailers like you?"<br>3. "The IT investment with a 6-month ROI"'
+                        },
+                        body: {
+                           prompt: '<strong>Role:</strong> E-commerce Consultant.<br><strong>Task:</strong> Draft an outreach email to a retail SME owner.<br><strong>Context:</strong> Focus on ROI and ease of use for a limited budget.<br><strong>Format:</strong> Empathetic and value-focused.',
+                           output: 'Hi [Name], I know that for many retail owners, every dollar of your IT budget has to deliver clear ROI. Our platform was designed for that reality. We helped businesses like yours boost online sales by up to 30% without needing a large IT team. Would you be open to seeing our 5-minute ROI calculator?'
+                        }
+                    },
+                    user: {
+                         headline: {
+                            prompt: '<strong>Role:</strong> Product Marketing Manager.<br><strong>Task:</strong> Write 3 headlines for a clinic manager.<br><strong>Context:</strong> Focus on usability and efficiency gains.<br><strong>Format:</strong> User-centric and friendly.',
+                            output: '1. "Less Paperwork, More Patient Care."<br>2. "The Clinic Management Software That Works For You."'
+                        },
+                        subject: {
+                           prompt: '<strong>Role:</strong> Customer Success Specialist.<br><strong>Task:</strong> Write 3 subject lines for an email about a new feature.<br><strong>Context:</strong> The recipient is a clinic manager who wants to improve reporting.<br><strong>Format:</strong> Helpful and clear.',
+                           output: '1. "New Feature: Your Reports, Now Automated!"<br>2. "Save time with our new analytics dashboard"<br>3. "A new way to track clinic performance"'
+                        },
+                        body: {
+                            prompt: '<strong>Role:</strong> Customer Success Specialist.<br><strong>Task:</strong> Draft a short email to a Clinic Manager (existing customer) announcing a new reporting feature.<br><strong>Context:</strong> Emphasize how it saves time and improves performance tracking.<br><strong>Format:</strong> Friendly and helpful tone, with a clear CTA to watch a tutorial video.',
+                            output: 'Hi [Name], We understand that managing clinic performance is one of your top priorities. That’s why we’re excited to introduce our new Advanced Analytics Dashboard! You can now generate custom reports in just a few clicks, saving hours of manual work each week. Check out our 2-minute tutorial video to get started today!'
+                        }
+                    }
+                },
+                update: function() {
+                    const segmentKey = this.segment.value;
+                    const contentKey = this.content.value;
+                    const data = this.prompts[segmentKey][contentKey];
+                    this.promptText.innerHTML = data.prompt;
+                    this.promptOutput.innerHTML = data.output;
+                }
+            };
+            [promptGenerator.segment, promptGenerator.content].forEach(el => el.addEventListener('change', () => promptGenerator.update()));
+            promptGenerator.copyButton.addEventListener('click', () => {
+                const textToCopy = promptGenerator.promptText.innerText;
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    promptGenerator.copyButton.innerText = 'Copied!';
+                    setTimeout(() => {
+                        promptGenerator.copyButton.innerText = 'Copy Prompt';
+                    }, 2000);
+                });
+            });
+            promptGenerator.update();
+
+
+            const scoringModels = [
+                {
+                    title: 'Manual Rule-Based Model',
+                    icon: '&#9998;', // Pencil icon
+                    howItWorks: 'You create a set of scoring rules (e.g., in a spreadsheet). Job title = “Director” earns +10 points, visited pricing page = +15. The total score determines lead priority.',
+                    advantages: 'Low cost, easy to understand, and no special tools needed.',
+                    limitations: 'Labor-intensive to maintain, static (doesn’t learn), and prone to human bias.',
+                    bestFor: 'Early-stage startups or companies with a small lead volume.'
+                },
+                {
+                    title: 'Built-In CRM Model',
+                    icon: '&#128187;', // Computer icon
+                    howItWorks: 'Modern CRMs (like HubSpot, Salesforce) use AI to analyze historical deal data (wins/losses) to predict conversion likelihood and assign a score.',
+                    advantages: 'Fully automated, self-learning, and seamlessly integrated into sales workflows.',
+                    limitations: 'Often a "black box" (hard to interpret), limited customization, and restricted to CRM data.',
+                    bestFor: 'Most small to medium-sized businesses (SMBs) with established CRM infrastructure.'
+                },
+                {
+                    title: 'Custom Machine Learning Model',
+                    icon: '&#128202;', // Bar chart icon
+                    howItWorks: 'A data science team builds a tailored model using Python/R. The model is trained on diverse historical data and deployed to evaluate new leads in real time.',
+                    advantages: 'Highest potential accuracy, fully customizable, and transparent scoring logic.',
+                    limitations: 'Requires advanced technical expertise, most expensive, and time-consuming to build.',
+                    bestFor: 'Enterprise-level organizations with large data volumes and dedicated data science teams.'
+                }
+            ];
+
+            const scoringContainer = document.getElementById('scoring-models-container');
+            scoringModels.forEach(model => {
+                const card = document.createElement('div');
+                card.className = 'stat-card';
+                card.innerHTML = `
+                    <div class="text-4xl mb-4 text-center text-amber-500">${model.icon}</div>
+                    <h3 class="text-xl font-bold text-slate-800 text-center mb-4">${model.title}</h3>
+                    <div class="text-center text-slate-600 mb-4">${model.bestFor}</div>
+                    <div class="text-center">
+                        <button class="details-btn bg-indigo-100 text-indigo-700 py-2 px-4 rounded-md hover:bg-indigo-200 transition">Show Details</button>
+                    </div>
+                    <div class="details-content hidden mt-4 pt-4 border-t border-slate-200 space-y-3">
+                        <div><strong class="text-slate-700">How it Works:</strong> <p class="text-slate-600 text-sm">${model.howItWorks}</p></div>
+                        <div><strong class="text-slate-700">Advantages:</strong> <p class="text-slate-600 text-sm">${model.advantages}</p></div>
+                        <div><strong class="text-slate-700">Limitations:</strong> <p class="text-slate-600 text-sm">${model.limitations}</p></div>
+                    </div>
+                `;
+                scoringContainer.appendChild(card);
+            });
+
+            scoringContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('details-btn')) {
+                    const content = e.target.closest('.stat-card').querySelector('.details-content');
+                    const isHidden = content.classList.contains('hidden');
+                    content.classList.toggle('hidden');
+                    e.target.textContent = isHidden ? 'Hide Details' : 'Show Details';
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('main section');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, { rootMargin: "-50% 0px -50% 0px" });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+        });
     </script>
 </body>
 </html>
